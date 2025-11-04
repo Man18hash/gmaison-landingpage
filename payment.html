@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>B Maison — Payment</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .wrap{ padding-top:24px; }
+      .grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:24px; }
+      .panel{ background:var(--bg-elev-1); border:1px solid var(--outline); border-radius:14px; padding:16px; }
+      .panel h3{ margin:0 0 8px; font-family:"Playfair Display", serif; }
+      .radio-row{ display:flex; gap:12px; align-items:center; }
+      .field{ display:grid; gap:6px; margin-top:10px; }
+      .input{ background:var(--bg-elev-2); border:1px solid var(--outline); color:var(--text); border-radius:10px; padding:10px 12px; width:100%; }
+      .muted{ color:var(--muted); }
+      .summary dl{ display:grid; grid-template-columns: auto 1fr; row-gap:6px; column-gap:10px; margin:0; }
+      .center{ text-align:center; }
+      .modal{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:40; }
+      .modal.open{ display:flex; }
+      .sheet{ background:var(--bg-elev-1); border:1px solid var(--outline); border-radius:16px; padding:18px; width:min(520px, 92vw); }
+      .qr{ display:grid; place-items:center; padding:10px; border:1px dashed var(--outline); border-radius:12px; background:var(--bg-elev-2); }
+      .receipt{ background:var(--bg-elev-2); border:1px solid var(--outline); border-radius:12px; padding:14px; margin-top:12px; }
+      @media(max-width:960px){ .grid{ grid-template-columns:1fr } }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/">B Maison</a>
+        <div></div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div class="container">
+        <div class="stepper"><span class="dot active"></span><span class="dot active"></span><span class="dot active"></span><span class="pill">3/3 Payment</span></div>
+      </div>
+      <div class="container grid">
+        <section class="panel">
+          <h3>Choose Payment</h3>
+          <p class="muted">Select a method to complete your reservation.</p>
+
+          <div class="radio-row" style="margin-top:10px;">
+            <input type="radio" name="method" id="m-gcash" value="gcash" checked>
+            <label for="m-gcash">GCash</label>
+          </div>
+          <div class="radio-row">
+            <input type="radio" name="method" id="m-card" value="card">
+            <label for="m-card">Debit/Credit Card</label>
+          </div>
+
+          <div id="gcashForm" class="panel" style="margin-top:12px;">
+            <h3>GCash</h3>
+            <p class="muted">Scan the QR with your GCash app. We will auto-verify in 2 seconds.</p>
+            <div class="qr">
+              <img id="qrImg" src="" alt="GCash QR" width="180" height="180" />
+            </div>
+            <button id="payGcash" class="button button-primary" style="margin-top:12px; width:100%;">I have sent the payment</button>
+          </div>
+
+          <div id="cardForm" class="panel" style="margin-top:12px; display:none;">
+            <h3>Card Payment</h3>
+            <div class="field"><span class="muted">Card Number</span><input class="input" id="cardNumber" placeholder="4111 1111 1111 1111" /></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
+              <div class="field"><span class="muted">Expiry</span><input class="input" id="cardExp" placeholder="12/28" /></div>
+              <div class="field"><span class="muted">CVV</span><input class="input" id="cardCVV" placeholder="123" /></div>
+            </div>
+            <button id="payCard" class="button button-primary" style="margin-top:12px; width:100%;">Pay ₱ now</button>
+            <p class="muted" style="margin-top:6px;">Demo only — no real charge.</p>
+          </div>
+        </section>
+
+        <aside class="panel summary">
+          <h3>Summary</h3>
+          <dl id="summary"></dl>
+        </aside>
+      </div>
+    </main>
+
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="sheet">
+        <h3 id="modalTitle">Processing…</h3>
+        <p class="muted" id="modalDesc">Please wait while we confirm your payment.</p>
+        <div id="modalExtra" class="center" style="margin-top:10px;"></div>
+        <div id="receipt" class="receipt" style="display:none;"></div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+          <a class="button" href="/">Close</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+      const booking = JSON.parse(localStorage.getItem('bmaison_booking')||'{}');
+      const user = JSON.parse(localStorage.getItem('bmaison_user')||'{}');
+      // Fill summary
+      const s = document.getElementById('summary');
+      function addRow(k,v){ const dt=document.createElement('dt'); dt.textContent=k; const dd=document.createElement('dd'); dd.textContent=v; s.append(dt,dd); }
+      if(booking.room){
+        addRow('Guest', user.name||'Guest');
+        addRow('Room', booking.room);
+        addRow('Dates', `${booking.arrival} → ${booking.departure}`);
+        addRow('Arrival time', booking.time);
+        const totalGuests = (booking.adults||0) + (booking.children||0);
+        addRow('Guests', `${totalGuests} (Adults ${booking.adults||0}, Children ${booking.children||0})`);
+      } else {
+        addRow('Note', 'Demo summary — no booking saved.');
+      }
+
+      // Toggle methods
+      const gcashForm = document.getElementById('gcashForm');
+      const cardForm = document.getElementById('cardForm');
+      document.getElementById('m-gcash').addEventListener('change',()=>{ gcashForm.style.display='block'; cardForm.style.display='none'; });
+      document.getElementById('m-card').addEventListener('change',()=>{ gcashForm.style.display='none'; cardForm.style.display='block'; });
+
+      // Generate QR for GCash
+      const amount = 1000; // demo amount
+      const ref = genRef();
+      const qrData = `BMAISON|GCASH|REF:${ref}|AMT:${amount}`;
+      document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrData)}`;
+
+      // Modal helpers
+      const modal = document.getElementById('modal');
+      const title = document.getElementById('modalTitle');
+      const desc = document.getElementById('modalDesc');
+      const extra = document.getElementById('modalExtra');
+      const receipt = document.getElementById('receipt');
+      function openModal(h,d){ title.textContent=h; desc.textContent=d; extra.innerHTML=''; receipt.style.display='none'; modal.classList.add('open'); }
+      function showSuccess(){
+        title.textContent = 'Payment successful';
+        desc.textContent = 'Your reservation is confirmed.';
+        const lines = [
+          `Reference: ${ref}`,
+          `Guest: ${user.name||'Guest'}`,
+          booking.room ? `Room: ${booking.room}` : '',
+          booking.arrival ? `Dates: ${booking.arrival} → ${booking.departure}` : ''
+        ].filter(Boolean);
+        receipt.style.display='block';
+        receipt.innerHTML = `<strong>Receipt</strong><br>${lines.join('<br>')}<br><br>Please present a valid ID and the reference number at the front desk.`;
+      }
+
+      // Actions
+      document.getElementById('payGcash').addEventListener('click', ()=>{
+        openModal('Waiting for GCash…','Verifying your payment in a moment.');
+        extra.innerHTML = document.querySelector('.qr').outerHTML;
+        setTimeout(showSuccess, 2000);
+      });
+      document.getElementById('payCard').addEventListener('click', ()=>{
+        openModal('Processing card…','This is a demo charge — no real payment will occur.');
+        const num = (document.getElementById('cardNumber').value||'4111 1111 1111 1111');
+        extra.innerHTML = `<div class="receipt">Card •••• ${num.slice(-4)}<br>Expiry ${document.getElementById('cardExp').value||'12/28'} • CVV ${document.getElementById('cardCVV').value||'123'}</div>`;
+        setTimeout(showSuccess, 2000);
+      });
+
+      function genRef(){
+        const n = Math.random().toString(36).slice(2,8).toUpperCase();
+        const t = Date.now().toString().slice(-6);
+        return `BMA-${t}-${n}`;
+      }
+    </script>
+  </body>
+  </html>
+
+

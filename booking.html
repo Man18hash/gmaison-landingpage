@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>B Maison — Book Your Stay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <style>
+      .booking-layout{ padding-top:24px; }
+      .room-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:18px; }
+      .room{ border:1px solid var(--outline); border-radius:14px; overflow:hidden; background:var(--bg-elev-2); display:grid; }
+      .room img{ height:160px; object-fit:cover; }
+      .room .body{ padding:12px; }
+      .filters{ display:grid; grid-template-columns: repeat(4,1fr); gap:10px; margin-top:12px; }
+      .filters label{ display:grid; gap:6px; color:var(--muted); font-size:14px; }
+      .filters input,.filters select{ background:var(--bg-elev-2); color:var(--text); border:1px solid var(--outline); border-radius:10px; padding:10px 12px; }
+      .thumbs-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:10px; }
+      .thumbs-grid img{ height:64px; object-fit:cover; border-radius:8px; border:1px solid var(--outline); }
+      @media(max-width:960px){ .room-cards{ grid-template-columns:1fr 1fr } .filters{ grid-template-columns:1fr 1fr } }
+      @media(max-width:720px){ .room-cards{ grid-template-columns:1fr } .filters{ grid-template-columns:1fr } }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="/">B Maison</a>
+        <nav class="nav" aria-label="Primary">
+          <ul id="navMenu">
+            <li><a href="/index.html#suites">Suites</a></li>
+            <li><a href="/index.html#amenities">Amenities</a></li>
+            <li><a href="/index.html#gallery">Gallery</a></li>
+            <li><a href="/index.html#location">Location</a></li>
+          </ul>
+        </nav>
+        <a class="button button-primary" href="/booking.html">Book</a>
+      </div>
+    </header>
+
+    <main class="booking-layout">
+      <section class="section">
+        <div class="container">
+          <div class="stepper"><span class="dot active"></span><span class="dot"></span><span class="dot"></span><span class="pill">1/3 Booking</span></div>
+          <h2>Book Your Stay</h2>
+          <p>Choose your dates and guests to view available rooms.</p>
+          <form id="bookingForm" class="filters" onsubmit="return false;">
+            <label><span>Arrival</span><input type="date" id="arr" required></label>
+            <label><span>Departure</span><input type="date" id="dep" required></label>
+            <label><span>Time of arrival</span><input type="time" id="time" value="15:00" required></label>
+            <label class="guests" data-role="guests">
+              <span>Guests</span>
+              <div class="trigger" id="guestsTriggerBk">
+                <span id="guestsSummaryBk">2 Adults, 0 Children</span>
+                <span>▾</span>
+              </div>
+              <div class="popover" id="guestsPopoverBk">
+                <div class="row"><span class="label">Adults</span>
+                  <div class="counter" data-counter="adults">
+                    <button type="button" class="btn" data-action="dec">−</button>
+                    <div class="value" id="adultsValBk">2</div>
+                    <button type="button" class="btn" data-action="inc">+</button>
+                  </div>
+                </div>
+                <div class="row"><span class="label">Children</span>
+                  <div class="counter" data-counter="children">
+                    <button type="button" class="btn" data-action="dec">−</button>
+                    <div class="value" id="childrenValBk">0</div>
+                    <button type="button" class="btn" data-action="inc">+</button>
+                  </div>
+                </div>
+              </div>
+            </label>
+          </form>
+
+          <div class="room-cards" id="rooms">
+            <article class="room">
+              <img src="/assets/images/rooms/family/family-01.jpeg" alt="3 Beds Family Suite">
+              <div class="body">
+                <h3 class="brand">3 Beds Family Suite</h3>
+                <p class="fineprint">Up to 6 guests • 65 m² • Breakfast included</p>
+                <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+                  <div class="pill">₱1,200 / night</div>
+                  <button class="button button-primary" data-room="3 Beds Family Suite">Select</button>
+                </div>
+                <div class="thumbs-grid">
+                  <img src="/assets/images/rooms/family/family-01.jpeg" alt="Family suite 1">
+                  <img src="/assets/images/rooms/family/family-02.jpeg" alt="Family suite 2">
+                  <img src="/assets/images/rooms/family/family-03.jpeg" alt="Family suite 3">
+                </div>
+              </div>
+            </article>
+            <article class="room">
+              <img src="/assets/images/rooms/king/king-01.jpeg" alt="Deluxe King Room">
+              <div class="body">
+                <h3 class="brand">Deluxe King Room</h3>
+                <p class="fineprint">2 guests • 32 m² • Mountain view</p>
+                <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+                  <div class="pill">₱3,500 / night</div>
+                  <button class="button button-primary" data-room="Deluxe King Room">Select</button>
+                </div>
+                <div class="thumbs-grid">
+                  <img src="/assets/images/rooms/king/king-01.jpeg" alt="King room 1">
+                  <img src="/assets/images/rooms/king/king-02.jpeg" alt="King room 2">
+                  <img src="/assets/images/rooms/king/king-03.jpeg" alt="King room 3">
+                </div>
+              </div>
+            </article>
+            <article class="room">
+              <img src="/assets/images/rooms/two-bedroom/two-01.jpeg" alt="Two‑Bedroom Suite">
+              <div class="body">
+                <h3 class="brand">Two‑Bedroom Suite</h3>
+                <p class="fineprint">Up to 5 guests • 54 m² • Living room</p>
+                <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+                  <div class="pill">₱2,000 / night</div>
+                  <button class="button button-primary" data-room="Two‑Bedroom Suite">Select</button>
+                </div>
+                <div class="thumbs-grid">
+                  <img src="/assets/images/rooms/two-bedroom/two-01.jpeg" alt="Two-bedroom 1">
+                  <img src="/assets/images/rooms/two-bedroom/two-02.jpeg" alt="Two-bedroom 2">
+                  <img src="/assets/images/rooms/two-bedroom/two-03.jpeg" alt="Two-bedroom 3">
+                </div>
+              </div>
+            </article>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+      function saveBookingAndGo(roomName){
+        const booking = {
+          room: roomName,
+          arrival: document.getElementById('arr').value,
+          departure: document.getElementById('dep').value,
+          time: document.getElementById('time').value,
+          adults: parseInt(document.getElementById('adultsValBk').textContent,10),
+          children: parseInt(document.getElementById('childrenValBk').textContent,10)
+        };
+        if(!booking.arrival || !booking.departure){
+          alert('Please choose arrival and departure dates.');
+          return;
+        }
+        localStorage.setItem('bmaison_booking', JSON.stringify(booking));
+        location.href = '/auth.html';
+      }
+      document.getElementById('rooms').addEventListener('click', (e)=>{
+        const btn = e.target.closest('button[data-room]');
+        if(btn){ saveBookingAndGo(btn.dataset.room); }
+      });
+      // Default dates helper
+      const today = new Date();
+      const tomorrow = new Date(Date.now()+86400000);
+      document.getElementById('arr').valueAsDate = today;
+      document.getElementById('dep').valueAsDate = tomorrow;
+
+      // Counter controls
+      document.querySelectorAll('.counter').forEach((wrap) => {
+        wrap.addEventListener('click', (e) => {
+          const btn = e.target.closest('.btn');
+          if (!btn) return;
+          const valueEl = wrap.querySelector('.value');
+          let val = parseInt(valueEl.textContent, 10);
+          if (btn.dataset.action === 'inc') val += 1;
+          if (btn.dataset.action === 'dec') val = Math.max(0, val - 1);
+          valueEl.textContent = String(val);
+        });
+      });
+    </script>
+  </body>
+</html>
+
+
